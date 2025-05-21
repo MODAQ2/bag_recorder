@@ -14,6 +14,7 @@
 #include <rosbag2_transport/record_options.hpp>
 #include <rosbag2_storage/storage_options.hpp>
 #include "modaq_messages/msg/bagcontrol.hpp"
+#include "modaq_messages/msg/systemmsg.hpp"
 #include <chrono>
 #include <memory>
 #include <vector>
@@ -42,11 +43,21 @@ public:
     this->declare_parameter<int>("fileDuration", 60);
     this->declare_parameter<std::vector<std::string>>("loggedTopics", {"/rosout", "/system_messenger", "/labjack_ain"});
     bagctrl_sub = create_subscription<modaq_messages::msg::Bagcontrol>("/bag_control", 10, std::bind(&BagRecorder::control_callback, this, _1));
+    publisher_sysmsg = this->create_publisher<modaq_messages::msg::Systemmsg>("/system_messenger", 10);
+
 
     // Get parameter values from config file
     data_folder_ = this->get_parameter("dataFolder").as_string();
     file_duration_ = this->get_parameter("fileDuration").as_int();
     logged_topics_ = this->get_parameter("loggedTopics").as_string_array();
+
+        // Send system start message
+    modaq_messages::msg::Systemmsg initmsg;
+    initmsg.email_option = 0;
+    initmsg.header.stamp = now();
+    initmsg.message_tag = "BagRecorder Started";
+    initmsg.log_enable = true;
+    publisher_sysmsg->publish(initmsg);
 
   }
 /**
@@ -126,6 +137,14 @@ public:
     executor->add_node(recorder_);
     recorder_->record();
     recording = true;
+
+            // Send system start message
+    modaq_messages::msg::Systemmsg initmsg;
+    initmsg.email_option = 0;
+    initmsg.header.stamp = now();
+    initmsg.message_tag = "BagRecorder Started";
+    initmsg.log_enable = true;
+    publisher_sysmsg->publish(initmsg);
   }
 
 private:
@@ -159,6 +178,13 @@ private:
       recorder_->stop();
       executor->remove_node(recorder_);
       recording = false;
+                  // Send system start message
+    modaq_messages::msg::Systemmsg initmsg;
+    initmsg.email_option = 0;
+    initmsg.header.stamp = now();
+    initmsg.message_tag = "BagRecorder Stopped";
+    initmsg.log_enable = true;
+    publisher_sysmsg->publish(initmsg);
     }
   }
 /**
@@ -181,6 +207,8 @@ private:
   rosbag2_storage::StorageOptions storage_options_;
   rclcpp::NodeOptions node_options_;
   rclcpp::Subscription<modaq_messages::msg::Bagcontrol>::SharedPtr bagctrl_sub;
+  rclcpp::Publisher<modaq_messages::msg::Systemmsg>::SharedPtr publisher_sysmsg;
+
   std::shared_ptr<rosbag2_transport::Recorder> recorder_;
   std::shared_ptr<rosbag2_cpp::Writer> writer_;
   bool recording = false;
