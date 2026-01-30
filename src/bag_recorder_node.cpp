@@ -1,6 +1,6 @@
 /**
  * @file bag_recorder_node.cpp
- * @author Casey Nichols (casey.nichols@nrel.gov)
+ * @author Casey Nichols (casey.nichols@nlr.gov)
  * @brief This package enables more control over the ros bag record process such as the ability to start and stop recording
  * @version 0.1
  * @date 2024-10-02
