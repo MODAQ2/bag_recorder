@@ -29,32 +29,6 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y ros-jazzy-ros2bag ros-jazzy-rosbag2-storage-default-plugins
 
-      - name: Install AWS SDK prerequisites
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y \
-            libcurl4-openssl-dev \
-            libssl-dev \
-            uuid-dev \
-            zlib1g-dev \
-            libpulse-dev \
-            cmake \
-            git
-
-      - name: Build and install AWS SDK (S3)
-        run: |
-          cd ~
-          git clone --recurse-submodules https://github.com/aws/aws-sdk-cpp
-          cd aws-sdk-cpp
-          mkdir sdk_build
-          cd sdk_build
-          cmake .. \
-            -DCMAKE_BUILD_TYPE=Debug \
-            -DCMAKE_PREFIX_PATH=/usr/local/ \
-            -DCMAKE_INSTALL_PREFIX=/usr/local/ \
-            -DBUILD_ONLY="s3"
-          make
-          sudo make install
 
       - name: Clone m2_core
         uses: actions/checkout@v4
@@ -65,7 +39,7 @@ jobs:
       - name: Build
         run: |
           source /opt/ros/jazzy/setup.bash
-          colcon build --packages-up-to aws_s3_uploader
+          colcon build --packages-up-to bag_recorder
         shell: bash
         
       - name: Confirm Build
