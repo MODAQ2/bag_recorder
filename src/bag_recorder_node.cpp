@@ -28,6 +28,7 @@ using std::placeholders::_1;
  * @brief main class which handles the control of the bag recorder
  * 
  */
+
 class BagRecorder : public rclcpp::Node
 {
 public:
@@ -121,7 +122,11 @@ public:
     if (logged_topics_[0] == "*") // handle record all topics
     {
       std::vector<std::string> emptyTopics;
-      record_options.all = true;
+      #ifdef ISHUMBLE
+        record_options.all = true;
+      #else
+        record_options.all_topics = true;
+      #endif
       record_options.is_discovery_disabled = false;
       record_options.topics = emptyTopics;
       record_options.rmw_serialization_format = "cdr";
@@ -130,7 +135,11 @@ public:
     }
     else
     {
-      record_options.all = false;
+      #ifdef ISHUMBLE
+        record_options.all = false;
+      #else
+        record_options.all_topics = false;
+      #endif
       record_options.is_discovery_disabled = false;
       record_options.topics = logged_topics_;
       record_options.rmw_serialization_format = "cdr";
