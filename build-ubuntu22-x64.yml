@@ -1,0 +1,75 @@
+name: Ubuntu 22.04 x64
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          path: src/aws_s3_uploader
+
+      - name: Setup ROS 2 Humble
+        uses: ros-tooling/setup-ros@v0.7
+        with:
+          required-ros-distributions: humble
+
+      - name: Install ros2bag
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ros-humble-ros2bag ros-humble-rosbag2-storage-default-plugins
+
+      - name: Install AWS SDK prerequisites
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libcurl4-openssl-dev \
+            libssl-dev \
+            uuid-dev \
+            zlib1g-dev \
+            libpulse-dev \
+            cmake \
+            git
+
+      - name: Build and install AWS SDK (S3)
+        run: |
+          cd ~
+          git clone --recurse-submodules https://github.com/aws/aws-sdk-cpp
+          cd aws-sdk-cpp
+          mkdir sdk_build
+          cd sdk_build
+          cmake .. \
+            -DCMAKE_BUILD_TYPE=Debug \
+            -DCMAKE_PREFIX_PATH=/usr/local/ \
+            -DCMAKE_INSTALL_PREFIX=/usr/local/ \
+            -DBUILD_ONLY="s3"
+          make
+          sudo make install
+
+      - name: Clone m2_core
+        uses: actions/checkout@v4
+        with:
+          repository: MODAQ2/m2_core
+          path: m2_core/src/modaq_messages
+
+      - name: Build
+        run: |
+          source /opt/ros/humble/setup.bash
+          colcon build --packages-up-to aws_s3_uploader
+        shell: bash
+        
+      - name: Confirm Build
+        run: | 
+          ls -a
+          tree
+        shell : bash
