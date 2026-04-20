@@ -15,7 +15,7 @@ find_package(modaq_messages REQUIRED)
 
 # Check the ROS_DISTRO environment variable
 if("$ENV{ROS_DISTRO}" STREQUAL "humble")
-    add_definitions(-DIS_HUMBLE)
+    add_definitions(-DISHUMBLE)
 else()
     # Assume Iron, Jazzy, or newer
 endif()
