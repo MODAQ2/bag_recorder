@@ -13,7 +13,12 @@ find_package(rosbag2_transport REQUIRED)
 find_package(rosbag2_storage REQUIRED)
 find_package(modaq_messages REQUIRED)
 
-
+# Check the ROS_DISTRO environment variable
+if("$ENV{ROS_DISTRO}" STREQUAL "humble")
+    add_definitions(-DISHUMBLE)
+else()
+    # Assume Iron, Jazzy, or newer
+endif()
 
 # uncomment the following section in order to fill in
 # further dependencies manually.
