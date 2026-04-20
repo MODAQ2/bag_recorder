@@ -17,7 +17,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          path: src/aws_s3_uploader
+          path: src/bag_recorder
 
       - name: Setup ROS 2 Humble
         uses: ros-tooling/setup-ros@v0.7
